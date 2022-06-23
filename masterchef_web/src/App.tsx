@@ -95,13 +95,18 @@ function App() {
     if (mscContract != null) {
       const availableAmount = await mscContract.getUserAmountDeposit(1)
       if (samWithdrawAmount - (parseInt(availableAmount.toString()) / 10 ** 12) <= 0) {
-        await mscContract.withdraw(1, parseUnits(samWithdrawAmount.toString(),12 ))
-        alert('withdraw success wait 45-60 seconds to receive sam')
+        try {
+          await mscContract.withdraw(1, parseUnits(samWithdrawAmount.toString(), 12))
+          alert('withdraw success wait 45-60 seconds to receive sam')
+        } catch (error) {
+          alert('system caught trouble')
+        }
       } else {
         alert('withdraw not good')
       }
     }
   }
+
   const [claimRewardAmount, setClaimRewardAmount] = useState<any>(0)
   const claimReward = async () => {
     const mscContract = await getContract('MSC')
