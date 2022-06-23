@@ -17,8 +17,9 @@ async function main() {
 
   const MasterChefFactory = await ethers.getContractFactory("MasterChef");
   MasterChefContract = await MasterChefFactory.deploy("0xB16D9e39aC1BA43735e6F4a0404B1D35872Aea8C", "0xF127Cad0f32B7C89D13d25C11a6E4aabe856d2D8", parseUnits("10", 12), 0);
+  console.log(MasterChefContract)
   await MasterChefContract.deployed();
-  console.log("contract deployed to:", MasterChefContract.address);
+  console.log("contract deployed to:", MasterChefContract);
 
 }
 

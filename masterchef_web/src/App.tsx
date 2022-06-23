@@ -3,7 +3,7 @@ import './App.css';
 import { useWeb3React } from '@web3-react/core'
 import { Injected } from './connectors'
 import { getContract } from './utils/getContract'
-import { MasterChef,} from './utils/constant'
+import { MasterChef, } from './utils/constant'
 const { parseUnits } = require("ethers/lib/utils");
 
 
@@ -32,10 +32,10 @@ function App() {
       const allowBalance = await contract.allowance(userAccount, MasterChef.contractAddress)
       const currentBalance = await contract.balanceOf(userAccount)
       const availableAmount = (currentBalance - allowBalance >= 0) ? allowBalance : currentBalance
-      console.log(currentBalance - allowBalance)
-      console.log('allow balalnce: ',allowBalance.toString())
-      console.log('current ballance', currentBalance.toString())
-      console.log('?',availableAmount.toString())
+      // console.log(currentBalance - allowBalance)
+      // console.log('allow balalnce: ', allowBalance.toString())
+      // console.log('current ballance', currentBalance.toString())
+      // console.log('?', availableAmount.toString())
       setSamAllowBal(parseInt((availableAmount / 10 ** 12).toString()))
     }
   }
@@ -94,7 +94,7 @@ function App() {
       // console.log('sam in chef', balInChef)
       // console.log('sam in allow', balInAllow)
       const availableSamToDeposit = await samContract.allowance(userAccount, MasterChef.contractAddress)
-      if (parseInt((availableSamToDeposit / 10 ** 12).toString()) > samDepositAmount) {
+      if (parseInt((availableSamToDeposit / 10 ** 12).toString()) >= samDepositAmount) {
         await mscContract.deposit(1, parseUnits(samDepositAmount.toString(), 12))
         alert('deposit success')
       } else {
@@ -107,8 +107,11 @@ function App() {
     const mscContract = await getContract('MSC')
     if (mscContract != null) {
       const availableAmount = await mscContract.getUserAmountDeposit(1)
-      if (samWithdrawAmount <= (parseInt(availableAmount.toString()) / 10 ** 12)) {
-        await mscContract.withdraw(1, parseUnits(samWithdrawAmount.toString(), 12))
+      // console.log(parseInt(availableAmount.toString()) / 10 ** 12)
+      // console.log(samWithdrawAmount)
+      console.log(parseUnits(samWithdrawAmount.toString(), 12).toString())
+      if (samWithdrawAmount - (parseInt(availableAmount.toString()) / 10 ** 12) <= 0) {
+        await mscContract.withdraw(1, 199999999999800)
         alert('withdraw success wait 45-60 seconds to receive sam')
       } else {
         alert('withdraw not good')

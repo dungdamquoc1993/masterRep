@@ -2,48 +2,9 @@ const { expect } = require("chai");
 const { parseUnits } = require("ethers/lib/utils");
 const { ethers } = require("hardhat");
 
-// describe("Masterchef function", function () {
-//   let MasterChefContract, RedDotTokenConTract, ScamCoinContract
-//   beforeEach(async () => {
-//     // deploy scam coin
-//     const ScamCoinFactory = await ethers.getContractFactory("ScamCoin");
-//     ScamCoinContract = await ScamCoinFactory.deploy();
-//     await ScamCoinContract.deployed();
-//     // deploy redot token
-//     const RedDotTokenFactory = await ethers.getContractFactory("RedDotToken");
-//     RedDotTokenConTract = await RedDotTokenFactory.deploy();
-//     await RedDotTokenConTract.deployed();
-//     // deploy master chef
-//     const MasterChefFactory = await ethers.getContractFactory("MasterChef");
-//     MasterChefContract = await MasterChefFactory.deploy(RedDotTokenConTract.address, "0xF127Cad0f32B7C89D13d25C11a6E4aabe856d2D8", 10, 14998129);
-//     await MasterChefContract.deployed();
-
-//     await ScamCoinContract.mint("0xF127Cad0f32B7C89D13d25C11a6E4aabe856d2D8", 1000) // mint 1000 scam coin
-//     await RedDotTokenConTract.mint("0xF127Cad0f32B7C89D13d25C11a6E4aabe856d2D8", 1000) // mint 1000 reddot token
-
-//   })
-//   it("updateMultiplier", async function () {
-//     await MasterChefContract.updateMultiplier(5)
-//     let newMultiPlier = await MasterChefContract.getCurrentMultiplier()
-//     expect(newMultiPlier).to.equal(5)
-//   })
-//   it("pool length", async function () {
-//     let poolLength = await MasterChefContract.poolLength()
-//     expect(poolLength).to.equal(1)
-//   })
-//   it("add new pool", async function () {
-//     await MasterChefContract.add(100, ScamCoinContract.address, true)
-//     let poolLength = await MasterChefContract.poolLength()
-//     expect(poolLength).to.equal(2)
-//   })
-//   it("update allocation", async function () {
-//     await MasterChefContract.add(100, ScamCoinContract.address, true)
-//     await MasterChefContract.set(1, 200, true)
-//     let poolInfo = await MasterChefContract.getPoolInfo()
-//     // console.log(poolInfo)
-//     // console.log("looking for the way to convert tuple to obj")
-//   })
-// });
+describe("Masterchef migrate", function () {
+  
+})
 
 describe("Masterchef Farming", function () {
   let MasterChefContract, RedDotTokenConTract, ScamCoinContract, a0, a1, a2, a3
@@ -76,14 +37,14 @@ describe("Masterchef Farming", function () {
     await ScamCoinContract.connect(a1).approve(MasterChefContract.address, parseUnits("200", 12))
   })
 
-  it('test RDX ownership', async () => {
-    await MasterChefContract.transferRDXOwnerShip(a1.address)
-    await RedDotTokenConTract.connect(a1).mint(a1.address, parseUnits("1000", 12))
-    const RDXOwner = await RedDotTokenConTract.owner()
-    console.log('a1 address: ', a1.address)
-    console.log('RDXOwner address: ', RDXOwner)
-    expect(a1.address).to.equal(RDXOwner)
-  })
+  // it('test RDX ownership', async () => {
+  //   await MasterChefContract.transferRDXOwnerShip(a1.address)
+  //   await RedDotTokenConTract.connect(a1).mint(a1.address, parseUnits("1000", 12))
+  //   const RDXOwner = await RedDotTokenConTract.owner()
+  //   console.log('a1 address: ', a1.address)
+  //   console.log('RDXOwner address: ', RDXOwner)
+  //   expect(a1.address).to.equal(RDXOwner)
+  // })
 
   // it('test allow balance', async () => {
   //   const a1Bal = await ScamCoinContract.balanceOf(a1.address)
@@ -164,6 +125,51 @@ describe("Masterchef Farming", function () {
   // })
 
 })
+
+
+// describe("Masterchef function", function () {
+//   let MasterChefContract, RedDotTokenConTract, ScamCoinContract
+//   beforeEach(async () => {
+//     // deploy scam coin
+//     const ScamCoinFactory = await ethers.getContractFactory("ScamCoin");
+//     ScamCoinContract = await ScamCoinFactory.deploy();
+//     await ScamCoinContract.deployed();
+//     // deploy redot token
+//     const RedDotTokenFactory = await ethers.getContractFactory("RedDotToken");
+//     RedDotTokenConTract = await RedDotTokenFactory.deploy();
+//     await RedDotTokenConTract.deployed();
+//     // deploy master chef
+//     const MasterChefFactory = await ethers.getContractFactory("MasterChef");
+//     MasterChefContract = await MasterChefFactory.deploy(RedDotTokenConTract.address, "0xF127Cad0f32B7C89D13d25C11a6E4aabe856d2D8", 10, 14998129);
+//     await MasterChefContract.deployed();
+
+//     await ScamCoinContract.mint("0xF127Cad0f32B7C89D13d25C11a6E4aabe856d2D8", 1000) // mint 1000 scam coin
+//     await RedDotTokenConTract.mint("0xF127Cad0f32B7C89D13d25C11a6E4aabe856d2D8", 1000) // mint 1000 reddot token
+
+//   })
+//   it("updateMultiplier", async function () {
+//     await MasterChefContract.updateMultiplier(5)
+//     let newMultiPlier = await MasterChefContract.getCurrentMultiplier()
+//     expect(newMultiPlier).to.equal(5)
+//   })
+//   it("pool length", async function () {
+//     let poolLength = await MasterChefContract.poolLength()
+//     expect(poolLength).to.equal(1)
+//   })
+//   it("add new pool", async function () {
+//     await MasterChefContract.add(100, ScamCoinContract.address, true)
+//     let poolLength = await MasterChefContract.poolLength()
+//     expect(poolLength).to.equal(2)
+//   })
+//   it("update allocation", async function () {
+//     await MasterChefContract.add(100, ScamCoinContract.address, true)
+//     await MasterChefContract.set(1, 200, true)
+//     let poolInfo = await MasterChefContract.getPoolInfo()
+//     // console.log(poolInfo)
+//     // console.log("looking for the way to convert tuple to obj")
+//   })
+// });
+
 
 
 function timeout(ms) {

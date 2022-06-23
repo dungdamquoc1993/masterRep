@@ -80,8 +80,26 @@ const getPoolLength = async () => {
     return poolLength
 }
 
+const checkSamBal = async (address) => {
+    const SAMWithSign = connectSAMWithKey(privateKey2)
+    const balance = await SAMWithSign.balanceOf(address)
+    console.log(parseInt(balance.toString()) / 10 ** 12)
+}
+// await mscContract.withdraw(1, parseUnits(samWithdrawAmount.toString(), 12))
+const withdrawFromPool = async (unit, amount) => {
+    const MSCWithSign = connectMSCWithKey(privateKey2)
+    const bal = await MSCWithSign.getUserAmountDeposit(1)
+    if (parseInt(bal.toString()) / 10 ** 12 - amount >= 0) {
+        console.log(bal)
+        console.log(await MSCWithSign.withdraw(unit, amount))
+    }
+
+}
+
 const main = async () => {
-    console.log((await getPoolLength()).toString())
+    // console.log((await getPoolLength()).toString())
+    // checkSamBal(account2)
+    withdrawFromPool(1, 99999999999800)
 }
 
 main()
