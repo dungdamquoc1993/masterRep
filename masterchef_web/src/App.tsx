@@ -79,23 +79,10 @@ function App() {
         alert('please connect your meta mask wallet before do this stuff')
         return
       }
-      // let balInPool = await mscContract.getUserAmountDeposit(1)
-      // // balInPool = parseInt(balInPool.toString()) / 10 ** 12
-
-      // let balInHand = await samContract.balanceOf(userAccount)
-      // // balInHand = parseInt(balInHand.toString()) / 10 ** 12
-
-      // let balInChef = await samContract.balanceOf(MasterChef.contractAddress)
-      // // balInChef = parseInt(balInChef.toString()) /10 ** 12
-
-      // let balInAllow = await samContract.allowance(userAccount, MasterChef.contractAddress)
-      // console.log('sam in hand', balInHand)
-      // console.log('sam in pool', balInPool)
-      // console.log('sam in chef', balInChef)
-      // console.log('sam in allow', balInAllow)
       const availableSamToDeposit = await samContract.allowance(userAccount, MasterChef.contractAddress)
       if (parseInt((availableSamToDeposit / 10 ** 12).toString()) >= samDepositAmount) {
-        await mscContract.deposit(1, parseUnits(samDepositAmount.toString(), 12))
+        const tx = await mscContract.deposit(1, parseUnits(samDepositAmount.toString(), 12))
+        tx?.wait();
         alert('deposit success')
       } else {
         alert('your balance is insufficient')
@@ -107,11 +94,8 @@ function App() {
     const mscContract = await getContract('MSC')
     if (mscContract != null) {
       const availableAmount = await mscContract.getUserAmountDeposit(1)
-      // console.log(parseInt(availableAmount.toString()) / 10 ** 12)
-      // console.log(samWithdrawAmount)
-      console.log(parseUnits(samWithdrawAmount.toString(), 12).toString())
       if (samWithdrawAmount - (parseInt(availableAmount.toString()) / 10 ** 12) <= 0) {
-        await mscContract.withdraw(1, 199999999999800)
+        await mscContract.withdraw(1, parseUnits(samWithdrawAmount.toString(),12 ))
         alert('withdraw success wait 45-60 seconds to receive sam')
       } else {
         alert('withdraw not good')
