@@ -15,7 +15,7 @@ describe("Masterchef Farming", function () {
     await rdxContract.deployed();
 
     const mscFactory = await ethers.getContractFactory("MasterChef");
-    mscContract = await mscFactory.deploy(rdxContract.address, parseUnits("10", 12));
+    mscContract = await mscFactory.deploy(rdxContract.address, parseUnits("100", 12));
     await mscContract.deployed();
 
     const wjkFactory = await ethers.getContractFactory("WojakToken");
@@ -31,14 +31,47 @@ describe("Masterchef Farming", function () {
 
     await wjkContract.mint(a0.address, parseUnits("1000", 12))
     await wjkContract.mint(a1.address, parseUnits("1000", 12))
+    await wjkContract.mint(a2.address, parseUnits("1000", 12))
     await uniContract.mint(a0.address, parseUnits("1000", 12))
-    await uniContract.mint(a1.address, parseUnits("1000", 12))
+    await uniContract.mint(a1.address, parseUnits("5000", 12))
     await mscContract.add(100, wjkContract.address, true, "wjk")
 
     await wjkContract.connect(a0).approve(mscContract.address, parseUnits("200", 12))
     await wjkContract.connect(a1).approve(mscContract.address, parseUnits("200", 12))
+    await wjkContract.connect(a2).approve(mscContract.address, parseUnits("200", 12))
     await uniContract.connect(a0).approve(mscContract.address, parseUnits("200", 12))
     await uniContract.connect(a1).approve(mscContract.address, parseUnits("200", 12))
+
+  })
+  it("test case Anh Đức", async () => {
+    console.log("reward per block = 100 RDX Token")
+    console.log("")
+    let tx = await mscContract.connect(a0).deposit('wjk', parseUnits('100', 12))
+    console.log('block number: ', tx.blockNumber)
+    console.log('token wjk user a0 deposit: ', (await mscContract.connect(a0).getUserAmountDeposit('wjk')) / 10 ** 12)
+    for (let i = 0; i < 999; i++) {
+      await uniContract.connect(a1).transfer(a2.address, parseUnits('1', 12))
+    }
+    tx = await mscContract.connect(a1).deposit('wjk', parseUnits('100', 12))
+    console.log("")
+    console.log('block number: ', tx.blockNumber)
+    console.log('user a0 accumulated reawrd =', (await mscContract.pendingRedDot('wjk', a0.address)) / 10 ** 12)
+    for (let i = 0; i < 999; i++) {
+      await uniContract.connect(a1).transfer(a2.address, parseUnits('1', 12))
+    }
+    tx = await mscContract.connect(a2).deposit('wjk', parseUnits('50', 12))
+    console.log("")
+    console.log('block number: ', tx.blockNumber)
+    console.log('user a0 accumulated reward =', (await mscContract.pendingRedDot('wjk', a0.address)) / 1e12)
+    for (let i = 0; i < 999; i++) {
+      await uniContract.connect(a1).transfer(a2.address, parseUnits('1', 12))
+    }
+    tx = await uniContract.connect(a1).transfer(a2.address, parseUnits('1', 12))
+    console.log("")
+    console.log('block number: ', tx.blockNumber)
+    console.log('user a0 accumulated reward =', (await mscContract.pendingRedDot('wjk', a0.address)) / 1e12)
+    console.log('user a1 accumulated reward =', (await mscContract.pendingRedDot('wjk', a1.address)) / 1e12)
+    console.log('user a2 accumulated reward =', (await mscContract.pendingRedDot('wjk', a2.address)) / 1e12)
 
   })
   // it("a1 deposit wjk twice to get RDX reward", async () => {
@@ -107,39 +140,34 @@ describe("Masterchef Farming", function () {
   //   console.log((await mscContract.connect(a1).getUserAmountDeposit('wjk')) / 10 ** 12)
   // })
 
-  it("add more pool", async () => {
-    await mscContract.connect(a1).deposit('wjk', parseUnits("50", 12)) // first deposit wjk
+  // it("add more pool", async () => {
+  //   await mscContract.connect(a1).deposit('wjk', parseUnits("50", 12)) // first deposit wjk
 
-    await wjkContract.connect(a0).transfer(a2.address, parseUnits("50", 12))
-    console.log('block1 a1 pending redDot', (await mscContract.pendingRedDot('wjk', a1.address) / 10 ** 12))
+  //   await wjkContract.connect(a0).transfer(a2.address, parseUnits("50", 12))
+  //   console.log('block1 a1 pending redDot', (await mscContract.pendingRedDot('wjk', a1.address) / 10 ** 12))
 
-    await mscContract.add(100, uniContract.address, true, 'uni')
-    console.log('block2 a1 pending redDot', (await mscContract.pendingRedDot('wjk', a1.address) / 10 ** 12))
+  //   await mscContract.add(100, uniContract.address, true, 'uni')
+  //   console.log('block2 a1 pending redDot', (await mscContract.pendingRedDot('wjk', a1.address) / 10 ** 12))
 
-    await mscContract.connect(a0).deposit('uni', parseUnits("50", 12)) //first deposit in uni
-    console.log('block3 a1 pending redDot', (await mscContract.pendingRedDot('wjk', a1.address) / 10 ** 12))
-    await mscContract.connect(a0).deposit('wjk', parseUnits("50", 12)) //first deposit in uni
-    console.log('block4 a1 pending redDot', (await mscContract.pendingRedDot('wjk', a1.address) / 10 ** 12))
-    await mscContract.connect(a0).deposit('wjk', parseUnits("50", 12)) //first deposit in uni
-    // console.log('block5 a1 pending redDot', (await mscContract.pendingRedDot('wjk', a1.address) / 10 ** 12))
-    // console.log('block6 a0 pending redDot', (await mscContract.pendingRedDot('wjk', a0.address) / 10 ** 12))
-    // console.log('block7 a0 pending redDot', (await mscContract.pendingRedDot('uni', a0.address) / 10 ** 12))
-    await wjkContract.connect(a0).transfer(a2.address, parseUnits("50", 12))
-    // console.log('block5 a1 pending redDot', (await mscContract.pendingRedDot('wjk', a1.address) / 10 ** 12))
-    // console.log('block6 a0 pending redDot', (await mscContract.pendingRedDot('wjk', a0.address) / 10 ** 12))
-    // console.log('block7 a0 pending redDot', (await mscContract.pendingRedDot('uni', a0.address) / 10 ** 12))
-    for (let i = 0; i < 300; i++) {
-      await wjkContract.connect(a0).transfer(a2.address, parseUnits("1", 12))
-    }
-    console.log('block100 a1 pending redDot', (await mscContract.pendingRedDot('wjk', a1.address) / 10 ** 12))
-    console.log('block100 a0 pending redDot', (await mscContract.pendingRedDot('wjk', a0.address) / 10 ** 12))
-    console.log('block100 a0 pending redDot', (await mscContract.pendingRedDot('uni', a0.address) / 10 ** 12))
-
-    const tx = await wjkContract.connect(a0).transfer(a2.address, parseUnits("1", 12))
-    console.log(tx.blockNumber)
-    console.log((await mscContract.pendingRedDot('wjk', a1.address) / 10 ** 12) + (await mscContract.pendingRedDot('wjk', a0.address) / 10 ** 12) + (await mscContract.pendingRedDot('uni', a0.address) / 10 ** 12))
-
-  })
+  //   await mscContract.connect(a0).deposit('uni', parseUnits("50", 12)) //first deposit in uni
+  //   console.log('block3 a1 pending redDot', (await mscContract.pendingRedDot('wjk', a1.address) / 10 ** 12))
+  //   await mscContract.connect(a0).deposit('wjk', parseUnits("50", 12)) //first deposit in uni
+  //   console.log('block4 a1 pending redDot', (await mscContract.pendingRedDot('wjk', a1.address) / 10 ** 12))
+  //   await mscContract.connect(a0).deposit('wjk', parseUnits("50", 12)) //first deposit in uni
+  //   // console.log('block5 a1 pending redDot', (await mscContract.pendingRedDot('wjk', a1.address) / 10 ** 12))
+  //   // console.log('block6 a0 pending redDot', (await mscContract.pendingRedDot('wjk', a0.address) / 10 ** 12))
+  //   // console.log('block7 a0 pending redDot', (await mscContract.pendingRedDot('uni', a0.address) / 10 ** 12))
+  //   await wjkContract.connect(a0).transfer(a2.address, parseUnits("50", 12))
+  //   // console.log('block5 a1 pending redDot', (await mscContract.pendingRedDot('wjk', a1.address) / 10 ** 12))
+  //   // console.log('block6 a0 pending redDot', (await mscContract.pendingRedDot('wjk', a0.address) / 10 ** 12))
+  //   // console.log('block7 a0 pending redDot', (await mscContract.pendingRedDot('uni', a0.address) / 10 ** 12))
+  //   for (let i = 0; i < 300; i++) {
+  //     await wjkContract.connect(a0).transfer(a2.address, parseUnits("1", 12))
+  //   }
+  //   const tx = await wjkContract.connect(a0).transfer(a2.address, parseUnits("1", 12))
+  //   console.log(tx.blockNumber)
+  //   console.log((await mscContract.pendingRedDot('wjk', a1.address) / 10 ** 12) + (await mscContract.pendingRedDot('wjk', a0.address) / 10 ** 12) + (await mscContract.pendingRedDot('uni', a0.address) / 10 ** 12))
+  // })
 })
 
 
@@ -293,9 +321,3 @@ describe("Masterchef Farming", function () {
 //   });
 // });
 
-
-// function timeout(ms) {
-//   return new Promise((res) => {
-//     setTimeout(res(), ms)
-//   })
-// }

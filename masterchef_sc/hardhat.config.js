@@ -24,5 +24,9 @@ module.exports = {
   },
   etherscan: {
     apiKey: 'XMVFM977E6W981B9QXDW7UIIDP7DTMV5VG'
-  }
+  },
+  mocha: {
+    timeout: 100000000
+  },
+
 }
