@@ -32,8 +32,8 @@ contract MasterChef is Ownable {
     uint256 public redDotPerBlock;
 
     // PoolInfo[] public poolInfo;
-    mapping(string => PoolInfo) poolInfoMap;
-    string[] poolNames;
+    mapping(string => PoolInfo) public poolInfoMap;
+    string[] public poolNames;
 
     // mapping(uint256 => mapping(address => UserInfo)) public userInfo;
     mapping(string => mapping(address => UserInfo)) public userInfoMap;
@@ -53,20 +53,8 @@ contract MasterChef is Ownable {
         redDotPerBlock = _redDotPerBlock;
     }
 
-    function getAllocPoint(string memory _poolName)
-        public
-        view
-        returns (uint256)
-    {
-        return poolInfoMap[_poolName].allocPoint;
-    }
-
     function updateMultiplier(uint256 multiplierNumber) public onlyOwner {
         BONUS_MULTIPLIER = multiplierNumber;
-    }
-
-    function getCurrentMultiplier() public view returns (uint256) {
-        return BONUS_MULTIPLIER;
     }
 
     function getMultiplier(uint256 _from, uint256 _to)
@@ -82,7 +70,8 @@ contract MasterChef is Ownable {
         IERC20 _lpToken,
         bool _withUpdate,
         string memory _poolName
-    ) public { // remove onlyOwner for test
+    ) public {
+        // onlyOwner is required in product version
         if (_withUpdate) {
             massUpdatePools(); // IMP make program more equal
         }
@@ -222,16 +211,11 @@ contract MasterChef is Ownable {
             user.rewardDebt
         ); // test ky doan 1e12 nay
         uint256 redDotBal = redDot.balanceOf(address(this));
-        if (_amount > pending) {
-            revert("Insuficent balance");
-        }
-        if (_amount > redDotBal) {
-            revert("amount bigger than Chef Balance");
-        }
-        if (_amount > 0 && pending > 0) {
-            user.rewardDebt = user.rewardDebt.add(_amount);
-            safeRedDotTransfer(msg.sender, _amount);
-        }
+        require(_amount > 0, "cannot claim 0 reward");
+        require(_amount <= pending, "Insuficent balance");
+        require(_amount <= redDotBal, "amount bigger than Chef Balance");
+        user.rewardDebt = user.rewardDebt.add(_amount);
+        safeRedDotTransfer(msg.sender, _amount);
     }
 
     function massUpdatePools() public {
@@ -260,7 +244,11 @@ contract MasterChef is Ownable {
         emit Withdraw(msg.sender, _poolName, _amount);
     }
 
-    function getUserAmountDeposit(string memory _poolName) public view returns (uint256) {
+    function getUserAmountDeposit(string memory _poolName)
+        public
+        view
+        returns (uint256)
+    {
         uint256 userAmount = userInfoMap[_poolName][msg.sender].amount;
         return userAmount;
     }

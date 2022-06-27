@@ -1,6 +1,6 @@
 import { ethers } from 'ethers'
 
-import { MasterChef, ScamCoin, RedDotToken } from './constant'
+import { MasterChef, UNIToken, RDXToken, WJKToken } from './constant'
 const { ethereum } = window
 
 export const getContract = async (contractName) => {
@@ -16,9 +16,11 @@ export const getContract = async (contractName) => {
     if (contractName === 'MSC') {
         contract = new ethers.Contract(MasterChef.contractAddress, MasterChef.contractABI, signer)
     } else if (contractName === 'RDX') {
-        contract = new ethers.Contract(RedDotToken.contractAddress, RedDotToken.contractABI, signer)
-    } else if (contractName === 'SAM') {
-        contract = new ethers.Contract(ScamCoin.contractAddress, ScamCoin.contractABI, signer)
+        contract = new ethers.Contract(RDXToken.contractAddress, RDXToken.contractABI, signer)
+    } else if (contractName === 'WJK') {
+        contract = new ethers.Contract(WJKToken.contractAddress, WJKToken.contractABI, signer)
+    } else if (contractName === 'UNI') {
+        contract = new ethers.Contract(UNIToken.contractAddress, UNIToken.contractABI, signer)
     }
     return contract
 }

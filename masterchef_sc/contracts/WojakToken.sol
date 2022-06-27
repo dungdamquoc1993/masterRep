@@ -6,7 +6,7 @@ import "./ERC20.sol";
 
 contract WojakToken is ERC20("Wojak Token", "WJK") {
 
-    function mint(address _to, uint256 _amount) public {
+    function mint(address _to, uint256 _amount) public { // onlyOwner is required in product version
         _mint(_to, _amount);
     }
 }

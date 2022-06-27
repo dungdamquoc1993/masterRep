@@ -7,6 +7,6 @@ import "./ERC20.sol";
 
 contract RedDotToken is ERC20("RedDot Token", "RDX") {
     constructor() {
-        _mint(msg.sender, 5000000 * 10**12);
+        _mint(msg.sender, 10000000 * 10**12);
     }
 }

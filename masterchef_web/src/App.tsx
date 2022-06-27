@@ -9,125 +9,173 @@ const { parseUnits } = require("ethers/lib/utils");
 
 function App() {
   let [userAccount, setUserAccount] = useState<any>('')
-  let [samBalance, setSamBalance] = useState<any>(0)
-  let [samAllowBal, setSamAllowBal] = useState<any>(0)
+  let [uniBalance, setUniBalance] = useState<any>(0)
+  let [uniAllowBal, setUniAllowBal] = useState<any>(0)
   let [RDXPending, setRDXPending] = useState<any>(0)
   let [userRDXBal, setUserRDXBal] = useState<any>(0)
+  let [userUNIBal, setUserUNIBal] = useState<any>(0)
   const { activate, account } = useWeb3React();
   const connectWallet = async () => {
     await activate(Injected)
   }
 
+  const getUserUNIBal = async () => {
+    const contract = await getContract('UNI')
+    if (contract != null) {
+      try {
+        const balance = await contract.balanceOf(userAccount)
+        setUserUNIBal(parseInt(balance.toString()) / 10 ** 12)
+      } catch (error) {
+        alert('get user UNI balance cause crash by system')
+      }
+    } else alert('get UNI contract failed')
+  }
+
   const getUserRDXBal = async () => {
     const contract = await getContract('RDX')
     if (contract != null && userAccount) {
-      const balance = await contract.balanceOf(userAccount)
-      setUserRDXBal(parseInt(balance.toString()) / 10 ** 12)
-    }
+      try {
+        const balance = await contract.balanceOf(userAccount)
+        setUserRDXBal(parseInt(balance.toString()) / 10 ** 12)
+      } catch (error) {
+        alert('get user RDX balance cause crash by system')
+      }
+    } else alert('get RDX contract failed')
   }
 
-  const getSamAllowBalance = async () => {
-    const contract = await getContract('SAM')
+  const getUniAllowBalance = async () => {
+    const contract = await getContract('UNI')
     if (contract != null && userAccount) {
-      const allowBalance = await contract.allowance(userAccount, MasterChef.contractAddress)
-      const currentBalance = await contract.balanceOf(userAccount)
-      const availableAmount = (currentBalance - allowBalance >= 0) ? allowBalance : currentBalance
-      // console.log(currentBalance - allowBalance)
-      // console.log('allow balalnce: ', allowBalance.toString())
-      // console.log('current ballance', currentBalance.toString())
-      // console.log('?', availableAmount.toString())
-      setSamAllowBal(parseInt((availableAmount / 10 ** 12).toString()))
-    }
+      try {
+        const allowBalance = await contract.allowance(userAccount, MasterChef.contractAddress)
+        const currentBalance = await contract.balanceOf(userAccount)
+        const availableAmount = (currentBalance - allowBalance >= 0) ? allowBalance : currentBalance
+        setUniAllowBal(parseInt((availableAmount / 10 ** 12).toString()))
+      } catch (error) {
+        alert('get uni allow balance cause crash by system')
+      }
+    } else alert('get UNI contract failed')
   }
 
-  const getSamDepositBalance = async () => {
+  const getUniDepositBalance = async () => {
     const contract = await getContract('MSC')
     if (contract != null) {
-      const balance = await contract.getUserAmountDeposit(1)
-      setSamBalance(parseInt(balance.toString()) / 10 ** 12)
-    } else {
-      alert('something went wrong')
-    }
+      try {
+        const balance = await contract.getUserAmountDeposit('uni')
+        setUniBalance(parseInt(balance.toString()) / 10 ** 12)
+      } catch (error) {
+        alert('get UNI deposit balance cause crash from system')
+      }
+    } else alert('get MSC contract failed in getUniDepositBal')
   }
 
   const getRDXPending = async () => {
     const contract = await getContract('MSC')
     if (contract != null) {
-      const RDXPending = await contract.pendingRedDot(1, userAccount)
+      const RDXPending = await contract.pendingRedDot('uni', userAccount)
       setRDXPending(parseInt(RDXPending.toString()) / 10 ** 12)
-    } else {
-      alert('something went wrong')
-    }
+    } else alert('get MSC contract failed in getRDXPending')
   }
 
-  const [samAllowAmount, setSamAllowAmount] = useState<any>(0)
-  const approveSam = async () => { // should require userAccount
-    const samContract = await getContract('SAM')
-    if (samContract != null) {
-      const approveSuccess = await samContract.approve(MasterChef.contractAddress, parseUnits(samAllowAmount.toString(), 12))
-      if (approveSuccess) {
-        alert('please wait about 30-45 seconds to deposit Sam')
+  const [uniAllowAmount, setUniAllowAmount] = useState<any>(0)
+  const approveUni = async () => { // should require userAccount
+    const uniContract = await getContract('UNI')
+    if (uniContract != null) {
+      try {
+        const approveSuccess = await uniContract.approve(MasterChef.contractAddress, parseUnits(uniAllowAmount.toString(), 12))
+        if (approveSuccess) {
+          alert('please wait about 30-45 seconds to deposit Uni')
+        }
+      } catch (error) {
+        alert('approve Uni cause crash by system')
       }
-    }
+    } else alert('get UNI contract failed')
   }
-  const [samDepositAmount, setSamDepositAmount] = useState<any>(0)
-  const depositSam = async () => {
+
+  const [uniDepositAmount, setUniDepositAmount] = useState<any>(0)
+  const depositUni = async () => {
+    if (!userAccount) {
+      alert('please connect your meta mask wallet before do this stuff')
+      return
+    }
     const mscContract = await getContract('MSC')
-    const samContract = await getContract('SAM')
-    if (mscContract != null && samContract != null) {
-      if (!userAccount) {
-        alert('please connect your meta mask wallet before do this stuff')
-        return
+    const uniContract = await getContract('UNI')
+    if (mscContract != null && uniContract != null) {
+      try {
+        const availableUniToDeposit = await uniContract.allowance(userAccount, MasterChef.contractAddress)
+        if (parseInt((availableUniToDeposit / 10 ** 12).toString()) >= uniDepositAmount) {
+          const tx = await mscContract.deposit('uni', parseUnits(uniDepositAmount.toString(), 12))
+          tx?.wait();
+          alert('deposit success')
+        } else {
+          alert('your balance is insufficient')
+        }
+      } catch (error) {
+        alert('deposit uni cause crash by system')
       }
-      const availableSamToDeposit = await samContract.allowance(userAccount, MasterChef.contractAddress)
-      if (parseInt((availableSamToDeposit / 10 ** 12).toString()) >= samDepositAmount) {
-        const tx = await mscContract.deposit(1, parseUnits(samDepositAmount.toString(), 12))
-        tx?.wait();
-        alert('deposit success')
-      } else {
-        alert('your balance is insufficient')
-      }
-    }
+    } else alert('get MSC or UNI contract failed in deposit')
   }
-  const [samWithdrawAmount, setSamWithdrawAmount] = useState<any>(0)
-  const withdrawSam = async () => {
+  const [uniWithdrawAmount, setUniWithdrawAmount] = useState<any>(0)
+  const withdrawUni = async () => {
     const mscContract = await getContract('MSC')
     if (mscContract != null) {
-      const availableAmount = await mscContract.getUserAmountDeposit(1)
-      if (samWithdrawAmount - (parseInt(availableAmount.toString()) / 10 ** 12) <= 0) {
+      const availableAmount = await mscContract.getUserAmountDeposit('uni')
+      if (uniWithdrawAmount - (parseInt(availableAmount.toString()) / 10 ** 12) <= 0) {
         try {
-          await mscContract.withdraw(1, parseUnits(samWithdrawAmount.toString(), 12))
-          alert('withdraw success wait 45-60 seconds to receive sam')
+          await mscContract.withdraw('uni', parseUnits(uniWithdrawAmount.toString(), 12))
+          alert('withdraw success wait 45-60 seconds to receive uni')
         } catch (error) {
-          alert('system caught trouble')
+          alert('withdraw Uni cause crash by system')
         }
       } else {
         alert('withdraw not good')
       }
-    }
+    } else alert('get MSC contract failed in withdraw')
   }
 
   const [claimRewardAmount, setClaimRewardAmount] = useState<any>(0)
   const claimReward = async () => {
     const mscContract = await getContract('MSC')
     if (mscContract != null) {
-      const pendingRDX = await mscContract.pendingRedDot(1, userAccount)
-      let claimAmountInSol = parseUnits(claimRewardAmount.toString(), 12)
-      if (pendingRDX - claimAmountInSol >= 0) {
-        await mscContract.claimReward(1, parseUnits(claimRewardAmount.toString(), 12))
-        alert('claim reward success wait 45-60 secons to receive reward')
-      } else {
-        alert('insufficinent balalnce')
+      try {
+        const pendingRDX = await mscContract.pendingRedDot('uni', userAccount)
+        let claimAmountInSol = parseUnits(claimRewardAmount.toString(), 12)
+        if (pendingRDX - claimAmountInSol >= 0) {
+          debugger
+          await mscContract.claimReward('uni', parseUnits(claimRewardAmount.toString(), 12))
+          debugger
+          alert('claim reward success wait 45-60 secons to receive reward')
+        } else {
+          alert('insufficinent balalnce')
+        }
+      } catch (error) {
+        console.log(error)
+        alert('claim reward cause crash by system')
       }
+    } else alert('get MSC contract failed in claim reward')
+  }
+
+  const mintUni = async () => {
+    const uniContract = await getContract('UNI')
+    if (uniContract != null) {
+      try {
+        await uniContract.mint(userAccount, parseUnits('1000', 12))
+        alert('mint success wait for 30-45 second to get uni token')
+      } catch (error) {
+        alert('mint Uni casue crash by system')
+      }
+    } else {
+      alert('get uni contract failed')
     }
   }
 
   useEffect(() => {
     if (userAccount) {
-      getSamDepositBalance()
-      getSamAllowBalance()
+      getUniDepositBalance()
+      getUniAllowBalance()
       getRDXPending()
       getUserRDXBal()
+      getUserUNIBal()
     }
   }, [userAccount])
   useEffect(() => {
@@ -145,60 +193,67 @@ function App() {
   }, [])
 
   return (
-    <div style={{ padding: 20 }}>
-      <main style={{ minHeight: 200, padding: 50, flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+    <div style={{ padding: 20, flexDirection: 'row', display: 'flex' }}>
+      <div style={{ minHeight: 200, padding: 50, flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
         <h1 style={{ color: 'blue' }}>
-          collect RDX by staking SAM Coin
+          collect RDX by staking UNI Coin
         </h1>
         <p>
           Your account: {userAccount}
         </p>
         <p>Your RDX Balance: {userRDXBal} RDX</p>
-
-        <button type="button" onClick={connectWallet} style={{ marginTop: 20 }} >
-          <p>
-            Connect Wallet
-          </p>
-        </button>
-
-        <div style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'flex-start', width: '40%' }}>
-          <p> Approve some Sam to deposit</p>
-          <input style={{ marginRight: 10 }} type='number' onChange={(e) => setSamAllowAmount(e.target.value)} />
-          <button type="button" onClick={approveSam} >
-            <p>Submit</p>
-          </button>
-          <h3>Sam available to deposit:{samAllowBal} SAM</h3>
-        </div>
-        <div style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'flex-start', width: '40%' }}>
-          <p > Deposit Sam:</p>
-          <input style={{ marginRight: 10 }} type='number' onChange={(e) => setSamDepositAmount(e.target.value)} />
-          <button type="button" onClick={depositSam} >
+        {!userAccount &&
+          <button type="button" onClick={connectWallet} style={{ marginTop: 20 }} >
+            <p>
+              Connect Wallet
+            </p>
+          </button>}
+        <p> Approve some UNI to deposit</p>
+        <div style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '40%', display: 'flex' }}>
+          <input style={{ marginRight: 10 }} type='number' onChange={(e) => setUniAllowAmount(e.target.value)} />
+          <button style={{ alignItems: 'center', justifyContent: 'center', display: 'flex', height: 25, width: 60 }} type="button" onClick={approveUni} >
             <p>Submit</p>
           </button>
         </div>
-        <div style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'flex-start', width: '40%' }}>
-          <p > Withdraw Sam:</p>
-          <input style={{ marginRight: 10 }} type='number' onChange={(e) => setSamWithdrawAmount(e.target.value)} />
-          <button type="button" onClick={withdrawSam} >
+        <h3>Uni available to deposit:{uniAllowBal} UNI</h3>
+
+        <p > Deposit Uni:</p>
+        <div style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '40%', display: 'flex' }}>
+          <input style={{ marginRight: 10 }} type='number' onChange={(e) => setUniDepositAmount(e.target.value)} />
+          <button style={{ alignItems: 'center', justifyContent: 'center', display: 'flex', height: 25, width: 60 }} type="button" onClick={depositUni} >
             <p>Submit</p>
           </button>
-          <h3>Your balance Sam in Pool: {samBalance} SAM</h3>
         </div>
+        <p > Withdraw Uni:</p>
+        <div style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '40%', display: 'flex' }}>
+          <input style={{ marginRight: 10 }} type='number' onChange={(e) => setUniWithdrawAmount(e.target.value)} />
+          <button style={{ alignItems: 'center', justifyContent: 'center', display: 'flex', height: 25, width: 60 }} type="button" onClick={withdrawUni} >
+            <p>Submit</p>
+          </button>
+        </div>
+        <h3>Your balance Uni in Pool: {uniBalance} UNI</h3>
 
-
-        <div style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'flex-start', width: '40%' }}>
-          <p > claim reward (make sure your balance is sufficient): </p>
+        <p > claim reward (make sure your balance is sufficient): </p>
+        <div style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '40%', display: 'flex' }}>
           <input style={{ marginRight: 10 }} type='number' onChange={(e) => setClaimRewardAmount(e.target.value)} />
-          <button type="button" onClick={claimReward} >
+          <button style={{ alignItems: 'center', justifyContent: 'center', display: 'flex', height: 25, width: 60 }} type="button" onClick={claimReward} >
             <p>Submit</p>
           </button>
-          <h3>
-            Your Pending Reddot token reward: {RDXPending} RDX
-          </h3>
+
         </div>
-      </main>
-
-
+        <h3>Your Pending Reddot token reward: {RDXPending} RDX</h3>
+      </div>
+      <div style={{ minHeight: 200, padding: 50, flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+        <div style={{ flexDirection: 'row', display: 'flex', alignItems: 'center' }} >
+          <h1 style={{ color: 'blue', marginRight: 20 }}>
+            Mint 1000 UNI for test
+          </h1>
+          <button style={{ alignItems: 'center', justifyContent: 'center', display: 'flex', height: 25, width: 60 }} type="button" onClick={mintUni} >
+            <p>mint </p>
+          </button>
+        </div>
+        <p>Your UNI Balance: {userUNIBal} UNI</p>
+      </div>
     </div>
   );
 }

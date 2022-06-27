@@ -6,7 +6,7 @@ import "./ERC20.sol";
 
 contract UniToken is ERC20("Uni Token", "UNI") {
 
-    function mint(address _to, uint256 _amount) public {
+    function mint(address _to, uint256 _amount) public { // onlyOwner is required in product version
         _mint(_to, _amount);
     }
 }

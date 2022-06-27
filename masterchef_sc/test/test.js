@@ -27,7 +27,7 @@ describe("Masterchef Farming", function () {
     await uniContract.deployed();
 
 
-    await rdxContract.connect(a0).transfer(mscContract.address, parseUnits('5000000', 12))
+    await rdxContract.connect(a0).transfer(mscContract.address, parseUnits('10000000', 12))
 
     await wjkContract.mint(a0.address, parseUnits("1000", 12))
     await wjkContract.mint(a1.address, parseUnits("1000", 12))
@@ -43,37 +43,45 @@ describe("Masterchef Farming", function () {
     await uniContract.connect(a1).approve(mscContract.address, parseUnits("200", 12))
 
   })
-  it("test case Anh Đức", async () => {
-    console.log("reward per block = 100 RDX Token")
-    console.log("")
-    let tx = await mscContract.connect(a0).deposit('wjk', parseUnits('100', 12))
-    console.log('block number: ', tx.blockNumber)
-    console.log('token wjk user a0 deposit: ', (await mscContract.connect(a0).getUserAmountDeposit('wjk')) / 10 ** 12)
-    for (let i = 0; i < 999; i++) {
-      await uniContract.connect(a1).transfer(a2.address, parseUnits('1', 12))
-    }
-    tx = await mscContract.connect(a1).deposit('wjk', parseUnits('100', 12))
-    console.log("")
-    console.log('block number: ', tx.blockNumber)
-    console.log('user a0 accumulated reawrd =', (await mscContract.pendingRedDot('wjk', a0.address)) / 10 ** 12)
-    for (let i = 0; i < 999; i++) {
-      await uniContract.connect(a1).transfer(a2.address, parseUnits('1', 12))
-    }
-    tx = await mscContract.connect(a2).deposit('wjk', parseUnits('50', 12))
-    console.log("")
-    console.log('block number: ', tx.blockNumber)
-    console.log('user a0 accumulated reward =', (await mscContract.pendingRedDot('wjk', a0.address)) / 1e12)
-    for (let i = 0; i < 999; i++) {
-      await uniContract.connect(a1).transfer(a2.address, parseUnits('1', 12))
-    }
-    tx = await uniContract.connect(a1).transfer(a2.address, parseUnits('1', 12))
-    console.log("")
-    console.log('block number: ', tx.blockNumber)
-    console.log('user a0 accumulated reward =', (await mscContract.pendingRedDot('wjk', a0.address)) / 1e12)
-    console.log('user a1 accumulated reward =', (await mscContract.pendingRedDot('wjk', a1.address)) / 1e12)
-    console.log('user a2 accumulated reward =', (await mscContract.pendingRedDot('wjk', a2.address)) / 1e12)
-
+  it('test claim reward', async () => {
+    await mscContract.connect(a0).deposit('wjk', parseUnits('100', 12))
+    await uniContract.connect(a0).transfer(a1.address, parseUnits('1', 12))
+    console.log((await mscContract.pendingRedDot('wjk', a0.address)) / 10 ** 12)
+    await mscContract.connect(a0).claimReward('wjk', parseUnits('100', 12))
+    console.log((await mscContract.pendingRedDot('wjk', a0.address)) / 10 ** 12)
+    console.log((await rdxContract.balanceOf(a0.address))/ 10 **12)
   })
+  // it("test case Anh Đức", async () => {
+  //   console.log("reward per block = 100 RDX Token")
+  //   console.log("")
+  //   let tx = await mscContract.connect(a0).deposit('wjk', parseUnits('100', 12))
+  //   console.log('block number: ', tx.blockNumber)
+  //   console.log('token wjk user a0 deposit: ', (await mscContract.connect(a0).getUserAmountDeposit('wjk')) / 10 ** 12)
+  //   for (let i = 0; i < 999; i++) {
+  //     await uniContract.connect(a1).transfer(a2.address, parseUnits('1', 12))
+  //   }
+  //   tx = await mscContract.connect(a1).deposit('wjk', parseUnits('100', 12))
+  //   console.log("")
+  //   console.log('block number: ', tx.blockNumber)
+  //   console.log('user a0 accumulated reawrd =', (await mscContract.pendingRedDot('wjk', a0.address)) / 10 ** 12)
+  //   for (let i = 0; i < 999; i++) {
+  //     await uniContract.connect(a1).transfer(a2.address, parseUnits('1', 12))
+  //   }
+  //   tx = await mscContract.connect(a2).deposit('wjk', parseUnits('50', 12))
+  //   console.log("")
+  //   console.log('block number: ', tx.blockNumber)
+  //   console.log('user a0 accumulated reward =', (await mscContract.pendingRedDot('wjk', a0.address)) / 1e12)
+  //   for (let i = 0; i < 999; i++) {
+  //     await uniContract.connect(a1).transfer(a2.address, parseUnits('1', 12))
+  //   }
+  //   tx = await uniContract.connect(a1).transfer(a2.address, parseUnits('1', 12))
+  //   console.log("")
+  //   console.log('block number: ', tx.blockNumber)
+  //   console.log('user a0 accumulated reward =', (await mscContract.pendingRedDot('wjk', a0.address)) / 1e12)
+  //   console.log('user a1 accumulated reward =', (await mscContract.pendingRedDot('wjk', a1.address)) / 1e12)
+  //   console.log('user a2 accumulated reward =', (await mscContract.pendingRedDot('wjk', a2.address)) / 1e12)
+
+  // })
   // it("a1 deposit wjk twice to get RDX reward", async () => {
   //   expect(true).to.equal(true)
   //   // first deposit turn supply to 50 and
