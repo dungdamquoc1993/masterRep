@@ -33,6 +33,7 @@ contract MasterChef is Ownable {
 
     // PoolInfo[] public poolInfo;
     mapping(string => PoolInfo) public poolInfoMap;
+    // map(uint => string)
     string[] public poolNames;
 
     // mapping(uint256 => mapping(address => UserInfo)) public userInfo;
@@ -189,6 +190,7 @@ contract MasterChef is Ownable {
     }
 
     function claimReward(string memory _poolName, uint256 _amount) public {
+        require(_amount > 0, "cannot claim 0 reward");
         PoolInfo storage pool = poolInfoMap[_poolName];
         UserInfo storage user = userInfoMap[_poolName][msg.sender];
         updatePool(_poolName);
@@ -211,7 +213,6 @@ contract MasterChef is Ownable {
             user.rewardDebt
         ); // test ky doan 1e12 nay
         uint256 redDotBal = redDot.balanceOf(address(this));
-        require(_amount > 0, "cannot claim 0 reward");
         require(_amount <= pending, "Insuficent balance");
         require(_amount <= redDotBal, "amount bigger than Chef Balance");
         user.rewardDebt = user.rewardDebt.add(_amount);

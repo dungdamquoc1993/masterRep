@@ -1,6 +1,6 @@
 const { ethers } = require("ethers");
 const { parseUnits } = require("ethers/lib/utils");
-const { MasterChef, UNIToken, RDXToken, WJKToken, INFURA_API, KOVAN_API } = require('./utils/constant')
+const { MasterChef, UNIToken, RDXToken, WJKToken, INFURA_API, KOVAN_API, RDLPToken } = require('./utils/constant')
 
 const account1 = '0xF127Cad0f32B7C89D13d25C11a6E4aabe856d2D8' // address 1
 const account2 = '0xe5f084144d8ff52b6FF61e5e5E551562B7bB270c' // address 2
@@ -29,6 +29,11 @@ function connectWJKWithKey(privKey) {
 function connectRDXWithKey(privKey) {
     const wallet = new ethers.Wallet(privKey, provider)
     const contract = new ethers.Contract(RDXToken.contractAddress, RDXToken.contractABI, provider)
+    return contract.connect(wallet)
+}
+function connectRDLPWithKey(privKey) {
+    const wallet = new ethers.Wallet(prvKey, provider)
+    const contract = new ethers.Contract(RDLPToken.contractAddress, RDLPToken.contractABI, provider)
     return contract.connect(wallet)
 }
 
@@ -68,12 +73,30 @@ const depositUniToChef = async (uniDepositAmount) => {
 const addUNIToPool = async () => {
     const mscContract = connectMSCWithKey(privateKey2)
     await mscContract.add(100, UNIToken.contractAddress, true, 'uni')
-   
+
+}
+
+const addRDLPToPool = async () => {
+    const mscContract = connectMSCWithKey(privateKey2)
+    await mscContract.add(100, RDLPToken.contractAddress, true, 'rdlp')
 }
 
 const main = async () => {
-    await getTokenBalance('rdx', privateKey2, MasterChef.contractAddress)
-    // addUNIToPool()
+    const mscContract = connectMSCWithKey(privateKey2)
+    let poolNames = []
+    let error = null
+    let i = 0
+    while (error == null) {
+        try {
+            const poolName = await mscContract.poolNames(i)
+            poolNames.push(poolName)
+            i+=1
+        } catch (err) {
+            error = err
+        }
+    }
+    console.log(poolNames)
+
 }
 
 main()

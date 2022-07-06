@@ -18,7 +18,7 @@ function App() {
   const connectWallet = async () => {
     await activate(Injected)
   }
-
+  // done
   const getUserUNIBal = async () => {
     const contract = await getContract('UNI')
     if (contract != null) {
@@ -30,7 +30,7 @@ function App() {
       }
     } else alert('get UNI contract failed')
   }
-
+  // done
   const getUserRDXBal = async () => {
     const contract = await getContract('RDX')
     if (contract != null && userAccount) {
@@ -83,6 +83,7 @@ function App() {
     if (uniContract != null) {
       try {
         const approveSuccess = await uniContract.approve(MasterChef.contractAddress, parseUnits(uniAllowAmount.toString(), 12))
+        await approveSuccess.wait()
         if (approveSuccess) {
           alert('please wait about 30-45 seconds to deposit Uni')
         }
@@ -141,9 +142,7 @@ function App() {
         const pendingRDX = await mscContract.pendingRedDot('uni', userAccount)
         let claimAmountInSol = parseUnits(claimRewardAmount.toString(), 12)
         if (pendingRDX - claimAmountInSol >= 0) {
-          debugger
           await mscContract.claimReward('uni', parseUnits(claimRewardAmount.toString(), 12))
-          debugger
           alert('claim reward success wait 45-60 secons to receive reward')
         } else {
           alert('insufficinent balalnce')
@@ -154,7 +153,7 @@ function App() {
       }
     } else alert('get MSC contract failed in claim reward')
   }
-
+  // process
   const mintUni = async () => {
     const uniContract = await getContract('UNI')
     if (uniContract != null) {
@@ -212,7 +211,7 @@ function App() {
         <div style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '40%', display: 'flex' }}>
           <input style={{ marginRight: 10 }} type='number' onChange={(e) => setUniAllowAmount(e.target.value)} />
           <button style={{ alignItems: 'center', justifyContent: 'center', display: 'flex', height: 25, width: 60 }} type="button" onClick={approveUni} >
-            <p>Submit</p>
+            <p>Approve</p>
           </button>
         </div>
         <h3>Uni available to deposit:{uniAllowBal} UNI</h3>
@@ -221,14 +220,14 @@ function App() {
         <div style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '40%', display: 'flex' }}>
           <input style={{ marginRight: 10 }} type='number' onChange={(e) => setUniDepositAmount(e.target.value)} />
           <button style={{ alignItems: 'center', justifyContent: 'center', display: 'flex', height: 25, width: 60 }} type="button" onClick={depositUni} >
-            <p>Submit</p>
+            <p>Deposit</p>
           </button>
         </div>
         <p > Withdraw Uni:</p>
         <div style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '40%', display: 'flex' }}>
           <input style={{ marginRight: 10 }} type='number' onChange={(e) => setUniWithdrawAmount(e.target.value)} />
           <button style={{ alignItems: 'center', justifyContent: 'center', display: 'flex', height: 25, width: 60 }} type="button" onClick={withdrawUni} >
-            <p>Submit</p>
+            <p>Withdraw</p>
           </button>
         </div>
         <h3>Your balance Uni in Pool: {uniBalance} UNI</h3>
@@ -237,7 +236,7 @@ function App() {
         <div style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '40%', display: 'flex' }}>
           <input style={{ marginRight: 10 }} type='number' onChange={(e) => setClaimRewardAmount(e.target.value)} />
           <button style={{ alignItems: 'center', justifyContent: 'center', display: 'flex', height: 25, width: 60 }} type="button" onClick={claimReward} >
-            <p>Submit</p>
+            <p>Claim</p>
           </button>
 
         </div>
